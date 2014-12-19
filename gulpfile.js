@@ -16,6 +16,7 @@ var jshint = require(buildModules + 'gulp-jshint');
 var yargs = require(buildModules + 'yargs')
 var zip = require(buildModules + 'gulp-zip');
 var clean = require(buildModules + 'gulp-clean');
+var fxoscli = require(buildModules + 'node-firefoxos-cli');
 
 const APP_ROOT = './app/';
 const DIST_ROOT = './dist/';
@@ -92,6 +93,19 @@ gulp.task('zip', function () {
 		])
 		.pipe(zip('app.zip'))
 		.pipe(gulp.dest(DIST_ROOT));
+});
+
+/**
+* Install and launch the app in the device.
+* Device must be setup in developer mode.
+*/
+gulp.task('deploy', ['zip'], function() {
+	var pkg = require('./package.json');
+	var id = pkg.name;
+	var install = fxoscli.installPackagedApp;
+	var launch = fxoscli.launchApp.bind(null, id);
+
+	return install(id, './dist/app.zip').then(launch);
 });
 
 /**
